@@ -39,6 +39,7 @@ RUN export DATABASE_URL=mysql2://localhost/temp?encoding=utf8 && \
     /etc/init.d/mariadb start && \
     mariadb -e "CREATE DATABASE temp" && \
     cp config/app_config.yml.SAMPLE config/app_config.yml && \
+    cp config/cable.yml.SAMPLE config/cable.yml && \
     cp config/database.yml.MySQL_SAMPLE config/database.yml && \
     cp config/storage.yml.SAMPLE config/storage.yml && \
     bundle exec rake db:setup assets:precompile && \
