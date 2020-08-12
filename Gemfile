@@ -75,7 +75,7 @@ gem 'foodsoft_wiki', path: 'plugins/wiki'
 
 # plugins not enabled by default
 # gem 'foodsoft_current_orders', path: 'plugins/current_orders'
-# gem 'foodsoft_printer', path: 'plugins/printer'
+gem 'foodsoft_printer', path: 'plugins/printer'
 # gem 'foodsoft_uservoice', path: 'plugins/uservoice'
 
 group :development do
