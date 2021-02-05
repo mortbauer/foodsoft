@@ -167,14 +167,10 @@ class OrderArticle < ApplicationRecord
         article_price.attributes = price_attributes
         if article_price.changed?
           # Updates also price attributes of article if update_global_price is selected
-          if update_global_price
-            article.update!(price_attributes)
-            self.article_price = article.article_prices.first and save # Assign new created article price to order article
-          else
-            # Creates a new article_price if neccessary
-            # Set created_at timestamp to order ends, to make sure the current article price isn't changed
-            create_article_price!(price_attributes.merge(article_id: article_id, created_at: order.ends)) and save
-          end
+          article.update_attributes!(price_attributes) if update_global_price
+
+          self.article_price = article.article_prices.find_or_create_by(price_attributes)
+          save
 
           # Updates ordergroup values
           update_ordergroup_prices
@@ -234,7 +230,7 @@ class OrderArticle < ApplicationRecord
   def init_from_balancing
     return unless order.present? && order.finished?
 
-    self.article_price = article.article_prices.first
+    self.article_price = article.current_article_price
   end
 
   def update_ordergroup_prices
