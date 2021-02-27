@@ -8,4 +8,5 @@
 *= require list.missing
 *= require recurring_select
 *= require actiontext
+*= require self_service
 */
