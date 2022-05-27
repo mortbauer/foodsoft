@@ -3,7 +3,4 @@
 %p= t('.first_paragraph')
 %p= t('.second_paragraph')
 
-= form_tag feedback_path do
-  = text_area_tag :message, nil, class: 'input-xxlarge', rows: 10, required: 'required'
-  .form-actions
-    = submit_tag t('.send'), class: 'btn btn-primary'
+%p= link_to "Poste dein Feedback bitte im Vernetzungs-Forum", "https://forum.foodcoops.at/auth/multi_sso?id=#{FoodsoftConfig.scope}"
