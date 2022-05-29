@@ -167,6 +167,9 @@ Rails.application.routes.draw do
       end
 
       resources :invoices do
+        collection do
+          post :pay
+        end
         get :attachment
         get :form_on_supplier_id_change, on: :collection
         get :unpaid, on: :collection
