@@ -38,17 +38,15 @@ RUN --mount=type=cache,target=/usr/local/bundle/ \
     bundle config build.nokogiri "--use-system-libraries" && \
     bundle config set --local without 'development test' && \
     bundle install -j 4 && \
-    # apt-get purge -y --auto-remove $buildDeps && \
-    # rm -Rf /var/lib/apt/lists/* /var/cache/apt/* ~/.gemrc ~/.bundle && \
     bundle exec whenever >crontab
 
 
+FROM builder as compiler
 
 # compile assets with temporary mysql server
 RUN --mount=type=cache,target=/usr/local/bundle/ \
     export DATABASE_URL=mysql2://localhost/temp?encoding=utf8 && \
     export SECRET_KEY_BASE=thisisnotimportantnow && \
-    export DEBIAN_FRONTEND=noninteractive && \
     /etc/init.d/mariadb start && \
     mariadb -e "CREATE DATABASE temp" && \
     cp config/app_config.yml.SAMPLE config/app_config.yml && \
@@ -56,16 +54,16 @@ RUN --mount=type=cache,target=/usr/local/bundle/ \
     cp config/database.yml.MySQL_SAMPLE config/database.yml && \
     cp config/storage.yml.SAMPLE config/storage.yml && \
     RAILS_ENV=production bundle exec rake db:setup assets:precompile && \
-    rm -Rf tmp/* && \
     /etc/init.d/mariadb stop && \
-    rm -Rf /run/mysqld /tmp/* /var/tmp/* /var/lib/mysql /var/log/mysql* && \
     cp -r /usr/local/bundle /bundle
-    # apt-get purge -y --auto-remove mariadb-server && \
-    # rm -Rf /var/lib/apt/lists/* /var/cache/apt/*
+
+FROM builder as app
+COPY --from=compiler /bundle /usr/local/bundle
+COPY --from=compiler /usr/src/app/public /usr/src/app/public
+COPY --from=compiler /usr/src/app/config /usr/src/app/config
 
 # Make relevant dirs and files writable for app user
 RUN mkdir -p tmp storage && \
-    rsync -ra /bundle/ /usr/local/bundle/ && \
     chown nobody config/app_config.yml && \
     chown nobody tmp && \
     chown nobody storage
