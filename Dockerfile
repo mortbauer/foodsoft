@@ -1,4 +1,4 @@
-FROM ruby:2.7.8
+FROM ruby:2.7.8 as builder
 
 RUN supercronicUrl=https://github.com/aptible/supercronic/releases/download/v0.1.3/supercronic-linux-amd64 && \
     supercronicBin=/usr/local/bin/supercronic && \
@@ -15,45 +15,62 @@ ENV PORT=3000 \
 
 WORKDIR /usr/src/app
 
-COPY . ./
+RUN --mount=type=cache,target=/var/cache/apt/ \
+    buildDeps='libmagic-dev mariadb-server nodejs' && \
+    apt-get update && \
+    apt-get install --no-install-recommends -y $buildDeps 
+
+COPY plugins plugins
+COPY config config
+COPY config.ru Gemfile Gemfile.lock proc-start Procfile Rakefile VERSION ./
+COPY app app
+COPY bin bin
+COPY db db
+COPY lib lib
+COPY script script
+COPY spec spec
+COPY vendor vendor
 
 # install dependencies and generate crontab
-RUN buildDeps='libmagic-dev' && \
-    apt-get update && \
-    apt-get install --no-install-recommends -y $buildDeps && \
+RUN --mount=type=cache,target=/usr/local/bundle/ \
     echo 'gem: --no-document' >> ~/.gemrc && \
     gem install bundler -v 2.4.22 && \
     bundle config build.nokogiri "--use-system-libraries" && \
-    bundle install --deployment --without development test -j 4 && \
-    apt-get purge -y --auto-remove $buildDeps && \
-    rm -Rf /var/lib/apt/lists/* /var/cache/apt/* ~/.gemrc ~/.bundle && \
-    \
+    bundle config set --local without 'development test' && \
+    bundle install -j 4 && \
+    # apt-get purge -y --auto-remove $buildDeps && \
+    # rm -Rf /var/lib/apt/lists/* /var/cache/apt/* ~/.gemrc ~/.bundle && \
     bundle exec whenever >crontab
 
+
+
 # compile assets with temporary mysql server
-RUN export DATABASE_URL=mysql2://localhost/temp?encoding=utf8 && \
+RUN --mount=type=cache,target=/usr/local/bundle/ \
+    export DATABASE_URL=mysql2://localhost/temp?encoding=utf8 && \
     export SECRET_KEY_BASE=thisisnotimportantnow && \
     export DEBIAN_FRONTEND=noninteractive && \
-    apt-get update && \
-    apt-get install -y mariadb-server nodejs && \
     /etc/init.d/mariadb start && \
     mariadb -e "CREATE DATABASE temp" && \
     cp config/app_config.yml.SAMPLE config/app_config.yml && \
     cp config/cable.yml.SAMPLE config/cable.yml && \
     cp config/database.yml.MySQL_SAMPLE config/database.yml && \
     cp config/storage.yml.SAMPLE config/storage.yml && \
-    bundle exec rake db:setup assets:precompile && \
+    RAILS_ENV=production bundle exec rake db:setup assets:precompile && \
     rm -Rf tmp/* && \
     /etc/init.d/mariadb stop && \
     rm -Rf /run/mysqld /tmp/* /var/tmp/* /var/lib/mysql /var/log/mysql* && \
-    apt-get purge -y --auto-remove mariadb-server && \
-    rm -Rf /var/lib/apt/lists/* /var/cache/apt/*
+    cp -r /usr/local/bundle /bundle
+    # apt-get purge -y --auto-remove mariadb-server && \
+    # rm -Rf /var/lib/apt/lists/* /var/cache/apt/*
 
 # Make relevant dirs and files writable for app user
 RUN mkdir -p tmp storage && \
+    rsync -ra /bundle/ /usr/local/bundle/ && \
     chown nobody config/app_config.yml && \
     chown nobody tmp && \
     chown nobody storage
+
+COPY docker-entrypoint.sh ./
 
 # Run app as unprivileged user
 USER nobody
