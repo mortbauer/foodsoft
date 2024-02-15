@@ -20,7 +20,7 @@ services:
       - ${PWD}/dev_config/app_config.yml:/usr/src/app/config/app_config.yml
       - ${PWD}/dev_config/storage.yml:/usr/src/app/config/storage.yml
       # - ${PWD}/app:/usr/src/app/app
-      # - ${PWD}/production_dev.rb:/usr/src/app/config/environments/production.rb
+      # - ${PWD}/dev_config/environments:/usr/src/app/config/environments/
     environment:
       # - DATABASE_URL=mysql2://root:secret@mariadb/development?encoding=utf8mb4
       - REDIS_URL=redis://redis:6379
