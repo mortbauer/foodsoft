@@ -18,9 +18,9 @@ services:
     volumes:
       - foodsoft:/usr/src/app/storage
       - ${PWD}/dev_config/app_config.yml:/usr/src/app/config/app_config.yml
-      - ${PWD}/dev_config/storage.yml:/usr/src/app/config/storage.yml
-      # - ${PWD}/app:/usr/src/app/app
-      # - ${PWD}/dev_config/environments:/usr/src/app/config/environments/
+      - ${PWD}/config/storage.yml.SAMPLE:/usr/src/app/config/storage.yml
+      - ${PWD}/config/environments/development.rb.SAMPLE:/usr/src/app/config/environments/production.rb
+      - ${PWD}/app:/usr/src/app/app
     environment:
       # - DATABASE_URL=mysql2://root:secret@mariadb/development?encoding=utf8mb4
       - REDIS_URL=redis://redis:6379
