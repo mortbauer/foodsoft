@@ -13,6 +13,12 @@ fi
 FOODSOFT_FOODCOOPS_REGEX=`echo $FOODSOFT_FOODCOOPS | sed 's/ /|/g'`
 
 sed -i "s/__FOODCOOPS__/$FOODSOFT_FOODCOOPS_REGEX/g" config/routes.rb
+for plugin in $(ls plugins); do
+    if [ -f "plugins/$plugin/config/routes.rb" ]; then
+        sed -i "s/__FOODCOOPS__/$FOODSOFT_FOODCOOPS_REGEX/g" plugins/$plugin/config/routes.rb
+    fi
+done
+
 
 if [ -e app_config.defaults.yml ] ; then
   cat app_config.defaults.yml > config/app_config.yml
