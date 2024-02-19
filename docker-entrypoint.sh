@@ -10,6 +10,10 @@ if [ ! -z "${FOODSOFT_DB_PREFIX}" ] || [ ! -z "${FOODSOFT_DB_PREFIX_FILE}" ]; th
   FOODSOFT_FOODCOOPS=`BUNDLE_CONFIG=/dev/null bundle exec ruby script/list_databases`
 fi
 
+FOODSOFT_FOODCOOPS_REGEX=`echo $FOODSOFT_FOODCOOPS | sed 's/ /|/g'`
+
+sed -i "s/__FOODCOOPS__/$FOODSOFT_FOODCOOPS_REGEX/g" config/routes.rb
+
 if [ -e app_config.defaults.yml ] ; then
   cat app_config.defaults.yml > config/app_config.yml
 
@@ -23,4 +27,4 @@ EOF
   done
 fi
 
-exec "$@"
+exec gosu nobody:nogroup "$@"

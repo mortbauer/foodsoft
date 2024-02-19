@@ -69,9 +69,9 @@ RUN mkdir -p tmp storage && \
     chown nobody storage
 
 COPY docker-entrypoint.sh ./
-
+RUN apt-get install -y gosu
 # Run app as unprivileged user
-USER nobody
+# USER nobody
 
 EXPOSE 3000
 
