@@ -57,6 +57,11 @@ RUN --mount=type=cache,target=/usr/local/bundle/ \
     /etc/init.d/mariadb stop && \
     cp -r /usr/local/bundle /bundle
 
+FROM builder as dev
+
+RUN gem install rubocop-rails rubocop-rspec rubocop-capybara rubocop-factory_bot
+
+
 FROM builder as app
 COPY --from=compiler /bundle /usr/local/bundle
 COPY --from=compiler /usr/src/app/public /usr/src/app/public
