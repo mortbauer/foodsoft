@@ -31,13 +31,26 @@ class MessagesController < ApplicationController
 
   # Creates a new message.
   def create
-    @message = @current_user.send_messages.new(params[:message])
-    if @message.save
-      DeliverMessageJob.perform_later(@message)
-      redirect_to messages_url, notice: I18n.t('messages.create.notice')
-    else
-      render action: 'new'
+    puts '_______________________________'
+    ActiveRecord::Base.transaction do
+      @current_user.with_lock do
+        @message = @current_user.send_messages.new(params[:message])
+        puts '------------------------------------------>'
+        puts @message.inspect
+        puts '<..........................................'
+
+        if @message.save
+          DeliverMessageJob.perform_later(@message)
+          redirect_to messages_url, notice: I18n.t('messages.create.notice')
+        else
+          raise ActiveRecord::Rollback # Rollback the transaction if the save fails
+        end
+      end
     end
+    rescue ActiveRecord::RecordInvalid => e
+      # Handle validation errors
+      render action: 'new'
+    puts '_______________________________<<<<<<'
   end
 
   # Shows a single message.
