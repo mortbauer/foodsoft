@@ -77,7 +77,15 @@ COPY docker-entrypoint.sh ./
 RUN apt-get install -y gosu
 # Run app as unprivileged user
 # USER nobody
-
+ARG REVISION
+ARG BUILDTIME
+LABEL org.opencontainers.image.created=$BUILDTIME
+LABEL org.opencontainers.image.authors=martin@villagefarmer.net
+LABEL org.opencontainers.image.url=https://github.com/foodcoops.at/foodsoft
+LABEL org.opencontainers.image.source=https://github.com/foodcoops.at/foodsoft
+LABEL org.opencontainers.image.revision=$REVISION
+LABEL org.opencontainers.image.vendor=IG-FoodCoops
+LABEL org.opencontainers.image.licenses=AGPLv3
 EXPOSE 3000
 
 VOLUME /usr/src/app/storage

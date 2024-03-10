@@ -21,6 +21,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta
+        uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: foodcoopsat/foodsoft
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
@@ -29,3 +34,6 @@ jobs:
           tags: ghcr.io/${{ github.repository }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+              BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+              REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
