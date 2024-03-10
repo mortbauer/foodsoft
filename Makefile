@@ -2,7 +2,7 @@
 
 IMAGE_NAME=foodsoft
 IMAGE_TAG:=latest
-BUILD_ARGS:= --build-arg REVISION="$(shell git rev-parse --short HEAD)" --build-arg BUILDTIME="$(shell date --rfc-3339=seconds)"
+BUILD_ARGS:= --build-arg REVISION="$(shell git rev-parse HEAD)" --build-arg BUILDTIME="$(shell date --rfc-3339=seconds)"
 
 image-dev:
 	docker buildx build --tag ${IMAGE_NAME}-rubocop:${IMAGE_TAG} --progress=plain --target=dev .
