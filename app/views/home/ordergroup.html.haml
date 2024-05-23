@@ -23,6 +23,7 @@
         = @ordergroup.memberships.map{|m| show_user m.user}.join(', ')
       - unless FoodsoftConfig[:disable_invite]
         = link_to t('.invite'), new_invite_path(:id => @ordergroup), :remote => true, class: 'btn btn-primary'
+      - '<home_ordergroup_well_mark>'
   .span8
     %h2= t('.account_summary')
     .well.well-small
@@ -30,4 +31,4 @@
         'data-submit-onchange' => true, class: 'form-search' do
         = text_field_tag :query, params[:query], class: 'input-medium search-query',
           placeholder: t('.search')
-    #transactions= render "finance/financial_transactions/transactions", with_csv: false
+    #transactions= render "finance/financial_transactions/transactions", with_csv: false, with_grouporder_links: true

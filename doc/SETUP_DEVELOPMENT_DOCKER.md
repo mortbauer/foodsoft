@@ -45,6 +45,8 @@ dependencies needs to be installed)
 
 Optionally an initial database (here seeded with `small.en`) can be loaded by running
 
+    docker-compose -f docker-compose-dev.yml run mariadb \
+      mariadb --host=mariadb --password=secret --execute="DROP DATABASE development; CREATE DATABASE development"
     docker-compose -f docker-compose-dev.yml run --rm foodsoft \
       bundle exec rake db:schema:load db:seed:small.en
 

@@ -5,7 +5,6 @@ module FoodsoftActiveStorageDiskController
     base.class_eval do
       def show
         if key = decode_verified_key
-          # puts '--------------------------------------FoodsoftActiveStorageDiskController: ' + key[:scope], key.inspect
           FoodsoftConfig.select_foodcoop(key[:scope])
           serve_file named_disk_service(key[:service_name]).path_for(key[:key]), content_type: key[:content_type], disposition: key[:disposition]
         else
@@ -26,8 +25,6 @@ module FoodsoftActiveStorageDiskService
         File.join root, FoodsoftConfig.scope, folder_for(key), key
       end
       def generate_url(key, expires_in:, filename:, content_type:, disposition:)
-        # puts 'AAAAAAAAAAAAAA generate_url SCOPE: '+FoodsoftConfig.scope
-        # puts 'AAAAAAAAAAAAAA', ActiveStorage.verifier.inspect
         content_disposition = content_disposition_with(type: disposition, filename: filename)
         verified_key_with_expiration = ActiveStorage.verifier.generate(
           {
@@ -41,9 +38,7 @@ module FoodsoftActiveStorageDiskService
           purpose: :blob_key
         )
 
-        if url_options.blank?
-          raise ArgumentError, "Cannot generate URL for #{filename} using Disk service, please set ActiveStorage::Current.url_options."
-        end
+        raise ArgumentError, "Cannot generate URL for #{filename} using Disk service, please set ActiveStorage::Current.url_options." if url_options.blank?
 
         url_helpers.rails_disk_service_url(verified_key_with_expiration, filename: filename, **url_options)
       end

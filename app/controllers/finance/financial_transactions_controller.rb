@@ -59,7 +59,8 @@ class Finance::FinancialTransactionsController < ApplicationController
 
     respond_to do |format|
       format.js
-      format.html { redirect_to finance_group_transactions_path(@ordergroup), notice: I18n.t('finance.financial_transactions.controller.create.notice') }
+      redirect_to finance_group_transactions_path(@ordergroup),
+                notice: I18n.t('finance.financial_transactions.controller.create.notice')
     end
   rescue ActiveRecord::RecordInvalid => error
     @error = error
