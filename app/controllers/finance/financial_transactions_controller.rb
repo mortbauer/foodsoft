@@ -51,11 +51,7 @@ class Finance::FinancialTransactionsController < ApplicationController
   def create
     @financial_transaction = FinancialTransaction.new(params[:financial_transaction])
     @financial_transaction.user = current_user
-    if @financial_transaction.ordergroup
-      @financial_transaction = @financial_transaction.add_transaction!
-    else
-      @financial_transaction.save!
-    end
+    @financial_transaction.save!
 
     respond_to do |format|
       format.js
