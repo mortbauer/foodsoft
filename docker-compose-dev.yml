@@ -23,6 +23,7 @@ services:
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
       - MAILCATCHER_ADDRESS=mailcatcher
       - MAILCATCHER_PORT=25
+      - SECRET_KEY_BASE=lwkuewlje
 
   mailcatcher:
     image: tophfr/mailcatcher
@@ -34,8 +35,10 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=development
+    ports:
+      - 3306:3306
     volumes:
-      - mariadb:/var/lib/mysql
+      - ./data/mariadb:/var/lib/mysql
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin

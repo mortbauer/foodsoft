@@ -1,4 +1,4 @@
-FROM ruby:2.7.8 as builder
+FROM ruby:2.7.8 AS builder
 
 RUN supercronicUrl=https://github.com/aptible/supercronic/releases/download/v0.1.3/supercronic-linux-amd64 && \
     supercronicBin=/usr/local/bin/supercronic && \
@@ -41,7 +41,7 @@ RUN echo 'gem: --no-document' >> ~/.gemrc && \
     bundle exec whenever >crontab
 
 
-FROM builder as compiler
+FROM builder AS compiler
 
 # compile assets with temporary mysql server
 RUN export DATABASE_URL=mysql2://localhost/test?encoding=utf8 && \
@@ -60,12 +60,12 @@ RUN export DATABASE_URL=mysql2://localhost/test?encoding=utf8 && \
     /etc/init.d/mariadb stop && \
     cp -r /usr/local/bundle /bundle
 
-FROM builder as dev
+FROM builder AS dev
 
 RUN gem install rubocop-rails rubocop-rspec rubocop-capybara rubocop-factory_bot
 
 
-FROM builder as app
+FROM builder AS app
 COPY --from=compiler /bundle /usr/local/bundle
 COPY --from=compiler /usr/src/app/public /usr/src/app/public
 COPY --from=compiler /usr/src/app/config /usr/src/app/config

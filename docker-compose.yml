@@ -39,6 +39,9 @@ services:
       - FOODSOFT_DB_USER=root
       - FOODSOFT_DB_PASSWORD=secret
       - RAILS_FORCE_SSL=false
+    depends_on:
+      - mariadb
+      - redis
 
   mailcatcher:
     image: tophfr/mailcatcher
