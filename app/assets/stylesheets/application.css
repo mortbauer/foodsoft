@@ -10,3 +10,6 @@
 *= require actiontext
 *= require self_service
 */
+.trix-button-group.trix-button-group--file-tools {
+    display:none;
+}
