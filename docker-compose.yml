@@ -1,19 +1,31 @@
-version: '2'
 services:
+
+  foodsoft-resque-ui:
+    extends: foodsoft_worker
+    command: ./bin/resque-web -p 8282 -F -d -r  redis:6379 --app-dir /tmp/resque
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.foodsoft_resque_ui.entrypoints: https
+      traefik.http.routers.foodsoft_resque_ui.rule: Host(`resque.app.local.at`)
+      traefik.http.routers.foodsoft_resque_ui.tls: "true"
+      traefik.http.services.foodsoft_resque_ui.loadbalancer.server.port: 8282
 
   foodsoft:
     extends: foodsoft_worker
     command: sh -c 'bundle install;./proc-start web'
     ports:
       - "4000:3000"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.foodsoft.entrypoints: https
+      traefik.http.routers.foodsoft.rule: Host(`app.local.at`)
+      traefik.http.routers.foodsoft.tls: "true"
+      traefik.http.services.foodsoft.loadbalancer.server.port: 3000
+
   foodsoft_worker:
-    # image: ghcr.io/foodcoopsat/foodsoft:2023-04-12v1
-    image: foodsoft:latest
-    # image: foodsoft-master
-    # image: foodsoft-develop1
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile-dev
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: ./proc-start worker
     volumes:
       - foodsoft:/usr/src/app/storage
@@ -35,7 +47,7 @@ services:
       - RAILS_ENV=production
       - FOODSOFT_DB_PREFIX=foodsoft_
       - FOODSOFT_DB_HOST=mariadb
-      - FOODSOFT_DB_NAME=foodsoft_franckkistl
+      - FOODSOFT_DB_NAME=foodsoft_demo
       - FOODSOFT_DB_USER=root
       - FOODSOFT_DB_PASSWORD=secret
       - RAILS_FORCE_SSL=false
@@ -45,8 +57,12 @@ services:
 
   mailcatcher:
     image: tophfr/mailcatcher
-    ports:
-      - "1080:80"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.mailcatcher.entrypoints: https
+      traefik.http.routers.mailcatcher.rule: Host(`mailcatcher.app.local.at`)
+      traefik.http.routers.mailcatcher.tls: "true"
+      traefik.http.services.mailcatcher.loadbalancer.server.port: 80
 
   mariadb:
     image: mariadb:10.11
@@ -70,8 +86,73 @@ services:
   redis:
     image: redis:6.2-alpine
 
+  traefik:
+    image: traefik:v3.2.0
+    command:
+      - --accesslog.fields.headers.names.Referer=keep
+      - --accesslog.fields.headers.names.User-Agent=keep
+      - --accesslog.filePath=/accesslog/access.log
+      - --accesslog.format=json
+      - --accesslog=true
+      - --configFile=/etc/traefik/traefik.yaml
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.api.entrypoints: https
+      traefik.http.routers.api.rule: Host(`traefik.local.at`)
+      traefik.http.routers.api.service: api@internal
+      traefik.http.routers.api.tls: "true"
+    ports:
+      - target: 25
+        published: 25
+        protocol: tcp
+        mode: host
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 143
+        published: 143
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+      - target: 465
+        published: 465
+        protocol: tcp
+        mode: host
+      - target: 587
+        published: 587
+        protocol: tcp
+        mode: host
+      - target: 993
+        published: 993
+        protocol: tcp
+        mode: host
+      - target: 4190
+        published: 4190
+        protocol: tcp
+        mode: host
+    volumes:
+      - accesslog:/accesslog
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "./dev_data/certs/:/etc/certs:ro"
+      - "./dev_config/traefik.yaml:/etc/traefik/traefik.yaml:ro"
+      - "./dev_config/traefik.d:/etc/traefik/conf.d:ro"
+
+  mkcert:
+    image: vishnunair/docker-mkcert
+    environment:
+      - domain=app.local.at,traefik.local.at,*.local.at
+    volumes:
+      - ./dev_data/certs/:/root/.local/share/mkcert
+    labels:
+      - "traefik.enable=false"
+
 volumes:
   bundle:
   mariadb:
   foodsoft:
+  accesslog:
 
