@@ -269,7 +269,7 @@ class Order < ApplicationRecord
       ordergroups.each(&:update_stats!)
 
       # Notifications
-      NotifyFinishedOrderJob.perform_later(FoodsoftConfig.scope,self)
+      NotifyFinishedOrderJob.perform_later(self)
     end
   end
 
@@ -314,7 +314,7 @@ class Order < ApplicationRecord
   end
 
   def send_to_supplier!(user)
-    SendOrderToSupplierJob.perform_later(FoodsoftConfig.scope,self)
+    SendOrderToSupplierJob.perform_later(self)
   end
 
   def do_end_action!
