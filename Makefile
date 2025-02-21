@@ -21,3 +21,4 @@ rubocop:
 
 cleanup-routes:
 	git checkout plugins/*/config/routes.rb
+	git checkout config/routes.rb
