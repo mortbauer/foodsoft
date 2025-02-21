@@ -6,7 +6,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.foodsoft_resque_ui.entrypoints: https
-      traefik.http.routers.foodsoft_resque_ui.rule: Host(`resque.app.local.at`)
+      traefik.http.routers.foodsoft_resque_ui.rule: Host(`resque.local.at`)
       traefik.http.routers.foodsoft_resque_ui.tls: "true"
       traefik.http.services.foodsoft_resque_ui.loadbalancer.server.port: 8282
 
@@ -29,10 +29,12 @@ services:
     command: ./proc-start worker
     volumes:
       - foodsoft:/usr/src/app/storage
-      - ${PWD}/dev_config/app_config.yml:/usr/src/app/config/app_config.yml
+      - ${PWD}/config/:/usr/src/app/config/
       - ${PWD}/config/storage.yml.SAMPLE:/usr/src/app/config/storage.yml
       - ${PWD}/config/initializers:/usr/src/app/config/initializers
       - ${PWD}/config/environments/development.rb.SAMPLE:/usr/src/app/config/environments/production.rb
+      - ${PWD}/dev_config/app_config.yml:/usr/src/app/config/app_config.yml
+      - ${PWD}/dev_config/database.yml:/usr/src/app/config/database.yml
       - ${PWD}/app:/usr/src/app/app
       - ${PWD}/plugins:/usr/src/app/plugins
       - ${PWD}/docker-entrypoint.sh:/usr/src/app/docker-entrypoint.sh
@@ -73,6 +75,7 @@ services:
       - 3306:3306
     volumes:
       - mariadb:/var/lib/mysql
+      - $PWD/dev_config/mariadb-myconf.cnf:/etc/mysql/conf.d/01_myconf.cnf
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
